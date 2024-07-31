@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require("cors");
 require('./db/config');
-const User = require("./db/user");
+const User = require("./db/user.js");
 const Product = require("./db/Product");
 const app = express();
 const jwt = require('jsonwebtoken');
@@ -11,6 +11,9 @@ const jwtKey = 'e-comm';
 app.use(express.json());
 app.use(cors());
 
+app.get("/",(req,res)=>{
+res.send("Welocme to the Database");
+});
 app.post("/register",async (req,resp ) => {
       let user = new User(req.body);
       let result = await user.save();
@@ -23,6 +26,7 @@ app.post("/register",async (req,resp ) => {
             resp.send({result,auth:token})
       })
 })
+  
 
 
 app.post("/login",async (req,resp) => {
@@ -45,11 +49,17 @@ app.post("/login",async (req,resp) => {
    
 })
 
-app.post("/add-product" ,verifyToken,async (req,resp) => {
-      let product = new Product(req.body);
-      let result = await product.save();
-      resp.send(result);
-})
+app.post("/add-product", verifyToken, async (req, resp) => {
+      try {
+        let product = new Product(req.body);
+        let result = await product.save();
+        resp.status(201).send(result); // Use proper status codes
+      } catch (error) {
+        console.error("Error adding product:", error);
+        resp.status(500).send({ error: "Failed to add product" });
+      }
+    });
+    
 
 app.get("/products",verifyToken, async(req,resp) => {
       let products = await Product.find();
