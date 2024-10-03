@@ -16,6 +16,13 @@ app.get("/", (req, res) => {
     res.send("Welcome to the Database");
 });
 
+// Verify JWT Token Middleware (move this above the routes)
+const verifyToken = expressJwt({
+    secret: jwtKey,
+    algorithms: ['HS256'],
+    getToken: req => req.headers.authorization && req.headers.authorization.split(' ')[1]
+});
+
 // Register Route
 app.post("/register", async (req, resp) => {
     const { name, email, password } = req.body;
@@ -137,13 +144,6 @@ app.get("/search/:key", verifyToken, async (req, resp) => {
         ]
     });
     resp.send(result);
-});
-
-// Verify JWT Token Middleware
-const verifyToken = expressJwt({
-    secret: jwtKey,
-    algorithms: ['HS256'],
-    getToken: req => req.headers.authorization && req.headers.authorization.split(' ')[1]
 });
 
 app.listen(5000, () => {
