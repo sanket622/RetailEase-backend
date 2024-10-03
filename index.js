@@ -14,18 +14,41 @@ app.use(cors());
 app.get("/",(req,res)=>{
 res.send("Welocme to the Database");
 });
-app.post("/register",async (req,resp ) => {
+app.post("/register", async (req, resp) => {
+      const { name, email, password } = req.body;
+  
+      // Check if all required fields are provided
+      if (!name || !email || !password) {
+          return resp.status(400).send({ result: "Please fill all the fields" });
+      }
+  
+      // Check if the user already exists based on the email
+      const userExists = await User.findOne({ email });
+      if (userExists) {
+          return resp.status(400).json({ message: "User already exists, need to login." });
+      }
+  
+      // Create a new user if they don't exist
       let user = new User(req.body);
-      let result = await user.save();
-      result=result.toObject();
-      delete result.password;
-      jwt.sign({result},jwtKey,{expiresIn:"2h"},(err,token)=>{
-            if(err){
-                  resp.send({result:"something went wrong , please try after sometimr"});
-            }
-            resp.send({result,auth:token})
-      })
-})
+      
+      // Save the new user to the database
+      try {
+          let result = await user.save();
+          result = result.toObject(); // Convert to plain object to remove mongoose specific fields
+          delete result.password; // Remove the password before sending the response
+          
+          // Generate a JWT token
+          jwt.sign({ result }, jwtKey, { expiresIn: "2h" }, (err, token) => {
+              if (err) {
+                  return resp.status(500).send({ result: "Something went wrong, please try again later" });
+              }
+              return resp.send({ result, auth: token });
+          });
+      } catch (error) {
+          return resp.status(500).send({ result: "Server error, please try again" });
+      }
+  });
+  
   
 
 
