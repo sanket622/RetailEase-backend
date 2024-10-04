@@ -108,15 +108,26 @@ app.get("/product/:id",verifyToken,async (req,resp)=>{
     
 })
 
-app.put("/product/:id",verifyToken,async(req,resp)=>{
-      let result = await Product.updateOne(
-            {_id:req.params.id},
-            {
-                  $set :req.body
-            }
-            )
-            resp.send(result)
-})
+app.put("/product/:id", verifyToken, async (req, resp) => {
+      try {
+          const updatedProduct = await Product.findByIdAndUpdate(
+              req.params.id,
+              {
+                  $set: req.body, // Updating the fields with the data from req.body
+              },
+              { new: true } // This option returns the updated document
+          );
+  
+          if (!updatedProduct) {
+              return resp.status(404).send({ message: "Product not found" });
+          }
+  
+          resp.status(200).send({ message: "Product updated successfully", product: updatedProduct });
+      } catch (error) {
+          resp.status(500).send({ message: "Error updating product", error });
+      }
+  });
+  
 
 app.get("/search/:key",verifyToken,async(req,resp)=>{
       let result = await Product.find({
