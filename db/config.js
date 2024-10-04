@@ -1,9 +1,9 @@
 // IMPORTING PACKAGE
 const mongoose = require("mongoose");
 
-
+const MONGO_URI=process.env.MONGO_URI
 // MAKING CONNECTION 
-const DB = mongoose.connect('mongodb+srv://user121:1234@cluster0.rr2mpun.mongodb.net/RetailEase?retryWrites=true&w=majority&appName=Cluster0');
+const DB = mongoose.connect(MONGO_URI);
 
 // Handle connection status
 DB.then(() => {
