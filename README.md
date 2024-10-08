@@ -1,1 +1,1 @@
-DEPLOYMENT LINK --> https://retailease-backend.onrender.com/
+DEPLOYMENT LINK --> https://retail-ease-backend-qf94.vercel.app/
