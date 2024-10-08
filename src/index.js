@@ -1,13 +1,13 @@
 require('dotenv').config(); 
 const express = require('express');
 const cors = require("cors");
-require('../db/config.js'); // Ensure this connects to your database
+require('../db/config.js'); 
 const User = require("../db/user.js");
-const Product = require("../db/Product.js"); // Make sure the filename is correct
+const Product = require("../db/Product.js"); 
 const jwt = require('jsonwebtoken');
 const app = express();
 
-const jwtKey = process.env.JWT_KEY || 'e-comm'; // Use an environment variable for the JWT key
+const jwtKey = process.env.JWT_KEY || 'e-comm'; 
 
 app.use(express.json());
 app.use(cors());
@@ -18,28 +18,18 @@ app.get("/", (req, res) => {
 
 app.post("/register", async (req, resp) => {
     const { name, email, password } = req.body;
-
-    // Check if all required fields are provided
     if (!name || !email || !password) {
         return resp.status(400).send({ result: "Please fill all the fields" });
     }
-
-    // Check if the user already exists based on the email
     const userExists = await User.findOne({ email });
     if (userExists) {
         return resp.status(400).json({ message: "User already exists, need to login." });
     }
-
-    // Create a new user if they don't exist
     let user = new User(req.body);
-
-    // Save the new user to the database
     try {
         let result = await user.save();
-        result = result.toObject(); // Convert to plain object to remove mongoose specific fields
-        delete result.password; // Remove the password before sending the response
-
-        // Generate a JWT token
+        result = result.toObject(); 
+        delete result.password;
         jwt.sign({ result }, jwtKey, { expiresIn: "2h" }, (err, token) => {
             if (err) {
                 return resp.status(500).send({ result: "Something went wrong, please try again later" });
@@ -47,7 +37,7 @@ app.post("/register", async (req, resp) => {
             return resp.send({ result, auth: token });
         });
     } catch (error) {
-        console.error(error); // Log the error for debugging
+        console.error(error); 
         return resp.status(500).send({ result: "Server error, please try again" });
     }
 });
@@ -74,7 +64,7 @@ app.post("/add-product", verifyToken, async (req, resp) => {
     try {
         let product = new Product(req.body);
         let result = await product.save();
-        resp.status(201).send(result); // Use proper status codes
+        resp.status(201).send(result); 
     } catch (error) {
         console.error("Error adding product:", error);
         resp.status(500).send({ error: "Failed to add product" });
